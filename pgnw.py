@@ -1,0 +1,110 @@
+import urllib2
+from bs4 import BeautifulSoup
+from res_pgth import respage
+import MySQLdb
+import time
+import threading
+
+opener = urllib2.build_opener()
+opener.addheaders = [('User-agent', 'Mozilla/5.0')]
+
+#result={}
+def openpage(url):
+
+	#url="https://www.zomato.com/chennai/restaurants"
+	page=urllib2.urlopen(url).read()
+	soup=BeautifulSoup(page)
+		#if i==1:
+	no=soup.find("div","col-l-3 mtop0 alpha tmargin pagination-number")
+	x=no.get_text().encode("utf-8")
+	x=x.split()
+	n=int(x[3])
+	print n
+	num=str(n)
+	for link in soup.find_all("li","resZS mbot0 pbot0 bb even  status1"):
+		try:
+			q={}
+			a=link.find("a")
+			urlres=a.get('href')
+			resname=a.get_text().encode("utf-8")
+			#result=respage(urlres)
+			#result["name"]=resname
+			#result["city"]=cname
+			q["name"]=resname
+			q["city"]=cname
+			q["link"]=urlres
+			print resname
+			nlink=link.find("a",class_="search-collapse")
+			if nlink!=None:
+				#print "found"
+				ngpage=nlink.get('href')
+				ngpage=str("https://www.zomato.com"+ngpage)
+				
+				#logging for restaurants that have extended links
+				fo=open("nlink.txt","a")
+				wdata=str(q["name"]+" "+q["city"]+" "+num+",")
+				fo.write(wdata)
+				fo.close()
+				
+				#calling function to crawl the extension webpage
+				openpage(ngpage)
+			else:
+				send.append(q)
+				
+		except Exception as e:
+				print e
+				time.sleep(30)
+				pass
+	#sending the list back to main execution			
+	return send
+			
+#openpage("https://www.zomato.com/chennai/restaurants")
+
+def gettotalpg(url):
+	page=urllib2.urlopen(url).read()
+	soup=BeautifulSoup(page)
+		#if i==1:
+	no=soup.find("div","col-l-3 mtop0 alpha tmargin pagination-number")
+	x=no.get_text().encode("utf-8")
+	x=x.split()
+	n=int(x[3])
+	print n
+	#num=str(n)
+	return n
+
+
+
+
+db=MySQLdb.connect("localhost","xxxx","xxxxx","xxxxxx")
+cursor=db.cursor()
+sql="SELECT `cityname`,`cityurl` from `city_url`;"	
+cursor.execute(sql)
+results=cursor.fetchall()
+count=0
+send=[]
+for row in results:
+	#result={}
+	ssend=[]
+	cname=row[0]
+	ccode=row[1]
+	i=1
+	n=1
+	while(i<=n):
+			try:
+				send=[]
+				print cname
+				url="https://www.zomato.com/"+ccode+"/restaurants?page="+str(i)
+				if i==1:
+					n=gettotalpg(url)
+				ssend=openpage(url)
+				print "calling function"
+				#print ssend
+				print i
+				respage(send)
+				i=i+1
+			
+			except Exception as e:
+				print e
+				time.sleep(30)
+				i=i+1
+				pass

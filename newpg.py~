@@ -1,0 +1,33 @@
+#<a href="/chennai/restaurants?cid=65518" class="search-collapse">
+import urllib2
+from bs4 import BeautifulSoup
+result={}
+def openpage(url):
+
+	#url="https://www.zomato.com/chennai/restaurants"
+	page=urllib2.urlopen(url).read()
+	soup=BeautifulSoup(page)
+		#if i==1:
+	no=soup.find("div","col-l-3 mtop0 alpha tmargin pagination-number")
+	x=no.get_text().encode("utf-8")
+	x=x.split()
+	n=int(x[3])
+	print n
+	for link in soup.find_all("li","resZS mbot0 pbot0 bb even  status1"):
+		#link=soup.find_all("li","resZS mb5 pb5 bb even  status1")
+		#print len(link)
+		a=link.find("a")
+		urlres=a.get('href')
+		resname=a.get_text().encode("utf-8")
+		#result=respage(urlres)
+		#result["name"]=resname
+		#result["city"]=cname
+		print resname
+		nlink=link.find("a",class_="search-collapse")
+		if nlink!=None:
+			print "found"
+			ngpage=nlink.get('href')
+			ngpage="https://www.zomato.com"+ngpage
+			openpage(url)
+			
+openpage("https://www.zomato.com/chennai/restaurants")
