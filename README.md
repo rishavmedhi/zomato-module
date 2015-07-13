@@ -1,2 +1,2 @@
 # zomato-module
-Consists of crawlers and retrieval code from zomato website
+Consists of crawlers for zomato website and retrieval code for zomato module for SRM SE
